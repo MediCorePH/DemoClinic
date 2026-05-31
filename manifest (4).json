@@ -1,0 +1,26 @@
+{
+  "name": "MediCore Clinic Management System",
+  "short_name": "MediCore",
+  "description": "Clinic management system for appointments, patient records, transactions, and online consultations.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#13243B",
+  "theme_color": "#13243B",
+  "categories": ["medical", "health", "productivity"],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

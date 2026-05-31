@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MediCore Clinic Management System</title>
+
+  <!-- Favicon & Icons -->
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+
+  <!-- PWA -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="MediCore">
+  <meta name="application-name" content="MediCore">
+  <meta name="theme-color" content="#13243B">
+  <meta name="description" content="MediCore Clinic Management System — appointments, patient records, transactions, and online consultations.">
+
+  <!-- MS Tiles -->
+  <meta name="msapplication-TileImage" content="icon-192.png">
+  <meta name="msapplication-TileColor" content="#13243B">
+  <meta name="msapplication-tap-highlight" content="no">
+
+  <!-- Open Graph -->
+  <meta property="og:title"        content="MediCore Clinic Management System">
+  <meta property="og:description"  content="Clinic management — appointments, patients, transactions & online consultations.">
+  <meta property="og:type"         content="website">
+  <meta property="og:image"        content="icon-192.png">
+  <meta name="twitter:card"        content="summary">
+  <meta name="twitter:title"       content="MediCore Clinic Management System">
+  <meta name="twitter:description" content="Appointments, patient records, financials & telemedicine.">
+
+  <!-- Manifest — required for real PWA install -->
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0E1A2D; width: 100vw; height: 100vh; overflow: hidden; }
+
+    /* ── SPLASH ── */
+    #splash {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(ellipse at center, #13243B 0%, #0E1A2D 70%);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 999; transition: opacity 0.6s ease;
+    }
+
+    #splash .logo-wrap {
+      position: relative;
+      width: 150px; height: 150px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    #splash img {
+      width: 132px; height: 132px;
+      border-radius: 28px;
+      object-fit: cover;
+      box-shadow:
+        0 0 0 3px #0E8C8C,
+        0 0 40px rgba(14,140,140,0.45),
+        0 10px 40px rgba(0,0,0,0.8);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* Fallback logo — shown if icon fails to load */
+    #splash .logo-fallback {
+      width: 132px; height: 132px;
+      border-radius: 28px;
+      background: linear-gradient(135deg, #13243B, #0E8C8C);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      box-shadow:
+        0 0 0 3px #0E8C8C,
+        0 0 40px rgba(14,140,140,0.45),
+        0 10px 40px rgba(0,0,0,0.8);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    #splash .logo-fallback svg { width: 60px; height: 60px; color: #fff; }
+    #splash .logo-fallback span {
+      color: rgba(255,255,255,0.9);
+      font-size: 11px; font-weight: 800;
+      margin-top: 6px; letter-spacing: 2px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    #splash .app-name {
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 30px; font-weight: 900;
+      margin-top: 26px; letter-spacing: 0.5px;
+      text-shadow: 0 0 20px rgba(14,140,140,0.55), 0 2px 8px rgba(0,0,0,0.8);
+    }
+    #splash .app-name b { color: #1FB0A6; font-weight: 900; }
+
+    #splash .app-sub {
+      color: rgba(255,255,255,0.6);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 12px; font-weight: 500;
+      margin-top: 6px; letter-spacing: 3px; text-transform: uppercase;
+    }
+
+    /* ── ECG / LIFELINE LOADER (replaces the spinning gold ring) ── */
+    .ecg-wrap {
+      margin-top: 34px;
+      width: 230px; height: 56px;
+      position: relative;
+      -webkit-mask: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+              mask: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+    }
+    .ecg-wrap svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+    /* faint baseline */
+    .ecg-base {
+      fill: none;
+      stroke: rgba(255,255,255,0.10);
+      stroke-width: 2;
+    }
+
+    /* the moving heartbeat trace */
+    .ecg-line {
+      fill: none;
+      stroke: #1FB0A6;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 0 6px rgba(31,176,166,0.9));
+      stroke-dasharray: 460;
+      stroke-dashoffset: 460;
+      animation: ecg-draw 1.6s linear infinite;
+    }
+
+    @keyframes ecg-draw {
+      0%   { stroke-dashoffset: 460; }
+      100% { stroke-dashoffset: -460; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50%      { transform: scale(1.045); }
+    }
+
+    /* ── APP IFRAME ── */
+    #app-frame {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      border: none; z-index: 1;
+    }
+
+    /* ── INSTALL BANNER ── */
+    #installBanner {
+      display: none;
+      position: fixed; bottom: 20px; left: 12px; right: 12px;
+      z-index: 998;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(19,36,59,0.22);
+      border: 1.5px solid #E2EAF4;
+      padding: 14px 16px;
+      align-items: center; gap: 12px;
+    }
+    #installBanner img { width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0; }
+    #installBanner .ib-text { flex: 1; min-width: 0; }
+    #installBanner .ib-title {
+      font-weight: 800; font-size: 14px; color: #13243B;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    #installBanner .ib-sub {
+      font-size: 12px; color: #6B7C93; margin-top: 2px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    #installBanner .ib-install {
+      background: linear-gradient(135deg, #13243B, #0E8C8C);
+      color: #fff; border: none; border-radius: 10px;
+      padding: 9px 16px; font-size: 12px; font-weight: 700;
+      cursor: pointer; white-space: nowrap; flex-shrink: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    #installBanner .ib-close {
+      background: none; border: none; color: #6B7C93;
+      font-size: 20px; cursor: pointer; padding: 4px;
+      flex-shrink: 0; line-height: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ SPLASH SCREEN ═══ -->
+  <div id="splash">
+    <div class="logo-wrap">
+      <img
+        src="icon-192.png"
+        alt="MediCore Clinic Management System"
+        onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='flex';"
+      >
+      <div class="logo-fallback" id="logo-fallback" style="display:none;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+        </svg>
+        <span>MEDICORE</span>
+      </div>
+    </div>
+    <div class="app-name">Medi<b>Core</b></div>
+    <div class="app-sub">Clinic Management</div>
+
+    <!-- Straight-line ECG / lifeline loader -->
+    <div class="ecg-wrap">
+      <svg viewBox="0 0 230 56" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path class="ecg-base" d="M0 28 H230"/>
+        <path class="ecg-line"
+          d="M0 28 H78 l6 -2 5 10 6 -30 7 44 6 -22 5 0 H230"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ═══ MAIN APP (Google Apps Script Web App) ═══ -->
+  <iframe
+    id="app-frame"
+    src="https://script.google.com/macros/s/AKfycbxv53C7lXWzNfMhr4_ETxe1MB09uaKbpmgKbwuPymod_gVJRx_eSVCkzNEIIiFSi2MW/exec"
+    allow="fullscreen; camera; microphone"
+    allowfullscreen
+  ></iframe>
+
+  <!-- ═══ PWA INSTALL BANNER ═══ -->
+  <div id="installBanner">
+    <img src="icon-192.png" alt="MediCore">
+    <div class="ib-text">
+      <div class="ib-title">Add to Home Screen</div>
+      <div class="ib-sub">Install MediCore for quick access</div>
+    </div>
+    <button class="ib-install" onclick="triggerInstall()">Install</button>
+    <button class="ib-close"   onclick="dismissInstall()">✕</button>
+  </div>
+
+  <script>
+    // ── Service Worker registration (required for PWA) ──
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.js')
+          .then(function (reg) { console.log('[SW] Registered:', reg.scope); })
+          .catch(function (err) { console.warn('[SW] Registration failed:', err); });
+      });
+    }
+
+    // ── Splash: dismiss when iframe finishes loading ──
+    var frame  = document.getElementById('app-frame');
+    var splash = document.getElementById('splash');
+
+    frame.onload = function () {
+      setTimeout(function () {
+        splash.style.opacity = '0';
+        setTimeout(function () { splash.style.display = 'none'; }, 600);
+      }, 900);
+    };
+
+    // ── Safety fallback: always dismiss after 6 seconds ──
+    setTimeout(function () {
+      splash.style.opacity = '0';
+      setTimeout(function () { splash.style.display = 'none'; }, 600);
+    }, 6000);
+
+    // ── PWA Install prompt ──
+    var deferredPrompt;
+
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('installBanner').style.display = 'flex';
+    });
+
+    window.addEventListener('appinstalled', function () {
+      document.getElementById('installBanner').style.display = 'none';
+      deferredPrompt = null;
+    });
+
+    function triggerInstall() {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(function () { deferredPrompt = null; });
+    }
+
+    function dismissInstall() {
+      document.getElementById('installBanner').style.display = 'none';
+    }
+  </script>
+
+</body>
+</html>
